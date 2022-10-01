@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bineos Test</title>
+    <script src="libs/handlebars.min.js"></script>
+    <script src="classes/Bineos.js"></script>
+    <script src="classes/BineosPlacement.js"></script>
+  </head>
+  <body>
+    <bineos-zone uid="tsmo807r2e0c"></bineos-zone>
+    <script>
+      (() => {
+        const bineos = new Bineos("4b049c71c1", "dl.ndz.de");
+
+        bineos.dataLayer.touchpoint = "startpage";
+
+        bineos.extVar.touchpoint = "startpage";
+
+        bineos.init();
+      })();
+    </script>
+  </body>
+</html>
