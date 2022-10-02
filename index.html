@@ -3,12 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <title>Bineos Test</title>
-    <script src="libs/handlebars.min.js"></script>
     <script src="classes/Bineos.js"></script>
+    <script src="classes/BineosTemplate.js"></script>
     <script src="classes/BineosPlacement.js"></script>
   </head>
   <body>
-    <bineos-zone uid="tsmo807r2e0c"></bineos-zone>
+    <bineos-zone uid="tsmo807r2e0c" extvar-type="1"></bineos-zone>
+
+    <bineos-zone uid="tsmo807r2e0c" extvar-type="2"></bineos-zone>
+
+    <bineos-zone uid="tsmo807r2e0c" extvar-type="3"></bineos-zone>
+
     <script>
       (() => {
         const bineos = new Bineos("4b049c71c1", "dl.ndz.de");

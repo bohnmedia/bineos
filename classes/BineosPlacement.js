@@ -10,7 +10,6 @@ class BineosPlacement {
   }
 
   clickurl(url, clicktracker = true) {
-    console.log("clickurl");
     this.data.clickurl = clicktracker ? this.data.clicktracker + encodeURIComponent(url) : url;
   }
 
@@ -39,7 +38,7 @@ class BineosPlacement {
     this.hook("onLoadPlacement");
 
     // Compile template
-    this.template = Handlebars.compile(this.data.html);
+    this.template = BineosTemplate.compile(this.data.html);
     this.container = document.createElement("div");
     this.container.innerHTML = this.template(this.data);
 
@@ -66,11 +65,26 @@ class BineosPlacement {
     url.pathname = "/request.php";
     url.searchParams.set("zone", zoneUid);
 
-    // Add extVars
+    // Location of callback function for extVar
     const callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";
-    url.searchParams.append("extVar[]", "callback:" + callback);
-    for (const key in this.bineosClass.extVar) {
-      const value = this.bineosClass.extVar[key];
+
+    // Extvars from target
+    const targetExtVar = {};
+    if (this.target) {
+      [...this.target.attributes].forEach((attr) => {
+        const split = attr.name.split("-");
+        if ("extvar" === split[0] && split.length > 1) {
+          targetExtVar[split.slice(1).join("-")] = attr.nodeValue;
+        }
+      });
+    }
+
+    // Bundle all extvars in an object
+    const extVar = Object.assign({ callback }, this.bineosClass.extVar, targetExtVar);
+
+    // Set global extvars from
+    for (const key in extVar) {
+      const value = extVar[key];
       url.searchParams.append("extVar[]", key + ":" + value);
     }
 
