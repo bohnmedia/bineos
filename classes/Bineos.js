@@ -24,16 +24,8 @@ class Bineos {
 
   // Add external hook
   on(modificatorName, modificatorFunction) {
-    switch (modificatorName) {
-      case "preparePlacement":
-        return this.onPreparePlacement.push(modificatorFunction);
-      case "loadPlacement":
-        return this.onLoadPlacement.push(modificatorFunction);
-      case "compileTemplate":
-        return this.onCompileTemplate.push(modificatorFunction);
-      case "outputTemplate":
-        return this.onOutputTemplate.push(modificatorFunction);
-    }
+    const key = "on" + modificatorName.charAt(0).toUpperCase() + modificatorName.substring(1);
+    this[key].push(modificatorFunction);
   }
 
   generateUid() {
@@ -53,6 +45,16 @@ class Bineos {
       // Load placement
       placement.load(uid);
     });
+  }
+
+  channelTracker(channelTrackerId, parameters = {}) {
+    const url = new URL('https://tm.' + this.containerDomain + '/tm/a/channel/tracker/' + channelTrackerId);
+    for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
+    fetch(url,{mode: 'no-cors', cache: 'no-cache'});
+  }
+
+  articleScore(parameters) {
+    this.channelTracker(this.asConfigChannelTrackerId, parameters);
   }
 
   // Load the bineos script

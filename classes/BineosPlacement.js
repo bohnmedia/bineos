@@ -11,8 +11,16 @@ class BineosPlacement {
     this.bineosClass.callback[this.callbackId] = this.callback.bind(this);
   }
 
-  clickurl(url, clicktracker = true) {
-    this.data.clickurl = clicktracker ? this.data.clicktracker + encodeURIComponent(url) : url;
+  clickurl(url) {
+    return this.data['rd_click_enc'] + encodeURIComponent(url);
+  }
+
+  shuffle(placement) {
+    placement.data.productLoop.sort((a, b) => Math.random() - 0.5);
+  }
+
+  limit(placement, limit) {
+    placement.data.productLoop.splice(limit);
   }
 
   hook(name) {

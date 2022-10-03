@@ -9,9 +9,7 @@
   </head>
   <body>
     <bineos-zone uid="tsmo807r2e0c" extvar-type="1"></bineos-zone>
-
     <bineos-zone uid="tsmo807r2e0c" extvar-type="2"></bineos-zone>
-
     <bineos-zone uid="tsmo807r2e0c" extvar-type="3"></bineos-zone>
 
     <script type="text/bineos-template" id="bineos-test">
@@ -26,8 +24,10 @@
 
         bineos.extVar.touchpoint = "startpage";
 
-        bineos.on("preparePlacement", (placement) => {
-          console.log(placement);
+        bineos.on("loadPlacement", (placement) => {
+          if (placement.zoneUid === 'tsmo807r2e0c' && placement.extVar.type === '3') {
+            placement.data.onLoadPlacement = 'shuffle;limit|3';
+          }
         });
 
         bineos.init();
