@@ -31,7 +31,6 @@
 
         bineos.on("loadPlacement", (placement) => {
           if (placement.zoneUid === "tsmo807r2e0c" && placement.extVar.type === "3") {
-            placement.data.productLoop = placement.data.productLoop.filter((product) => product.imageSmall);
             placement.templateId = "bineos-test";
           }
         });
