@@ -12,7 +12,7 @@ class BineosPlacement {
   }
 
   clickurl(url) {
-    return this.data['rd_click_enc'] + encodeURIComponent(url);
+    return this.data["rd_click_enc"] + encodeURIComponent(url);
   }
 
   shuffle(placement) {
@@ -45,16 +45,14 @@ class BineosPlacement {
   async callback(data) {
     Object.assign(this.data, data);
 
-    this.data.templateSrc = this.target ? this.target.getAttribute("template-src") : null;
-    this.data.templateId = this.target ? this.target.getAttribute("template-id") : null;
     this.data.replace = this.target ? this.target.hasAttribute("replace") : null;
 
     // Run onParseTemplate hook
     this.hook("onLoadPlacement");
 
     // Template from file
-    if (this.data.templateSrc) {
-      let response = await fetch(this.data.templateSrc);
+    if (this.templateSrc) {
+      let response = await fetch(this.templateSrc);
       if (response.status === 200) {
         let html = await response.text();
         this.data.html = html;
@@ -62,8 +60,8 @@ class BineosPlacement {
     }
 
     // Template from tag
-    if (this.data.templateId) {
-      let templateTag = document.querySelector("#" + this.data.templateId + '[type="text/bineos-template"]');
+    if (this.templateId) {
+      let templateTag = document.querySelector("#" + this.templateId + '[type="text/bineos-template"]');
       if (templateTag) this.data.html = templateTag.text;
     }
 
@@ -117,6 +115,10 @@ class BineosPlacement {
         }
       });
     }
+
+    // Templates from target
+    this.templateSrc = this.target ? this.target.getAttribute("template-src") : null;
+    this.templateId = this.target ? this.target.getAttribute("template-id") : null;
 
     // Location of callback function for extVar
     this.extVar.callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";

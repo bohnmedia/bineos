@@ -13,7 +13,12 @@
     <bineos-zone uid="tsmo807r2e0c" extvar-type="3"></bineos-zone>
 
     <script type="text/bineos-template" id="bineos-test">
-      <p>Hello world!</p>
+      {{#each productLoop}}
+        <h3>{{this.headline}}</h3>
+        <img src="{{this.imageSmall}}">
+        <p>{{this.teaser}}</p>
+        <a href="{{this.clickurl}}">mehr ...</a>
+      {{/each}}
     </script>
 
     <script>
@@ -25,8 +30,9 @@
         bineos.extVar.touchpoint = "startpage";
 
         bineos.on("loadPlacement", (placement) => {
-          if (placement.zoneUid === 'tsmo807r2e0c' && placement.extVar.type === '3') {
-            placement.data.onLoadPlacement = 'shuffle;limit|3';
+          if (placement.zoneUid === "tsmo807r2e0c" && placement.extVar.type === "3") {
+            placement.data.productLoop = placement.data.productLoop.filter((product) => product.imageSmall);
+            placement.templateId = "bineos-test";
           }
         });
 
