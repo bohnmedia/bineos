@@ -14,6 +14,10 @@
 
     <bineos-zone uid="tsmo807r2e0c" extvar-type="3"></bineos-zone>
 
+    <script type="text/bineos-template" id="bineos-test">
+      <p>Hello world!</p>
+    </script>
+
     <script>
       (() => {
         const bineos = new Bineos("4b049c71c1", "dl.ndz.de");
@@ -21,6 +25,10 @@
         bineos.dataLayer.touchpoint = "startpage";
 
         bineos.extVar.touchpoint = "startpage";
+
+        bineos.on("preparePlacement", (placement) => {
+          console.log(placement);
+        });
 
         bineos.init();
       })();

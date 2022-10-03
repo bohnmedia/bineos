@@ -8,6 +8,7 @@ class Bineos {
     this.extVar = {};
     this.getParameter = {};
     this.callback = {};
+    this.onPreparePlacement = [];
     this.onLoadPlacement = [];
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
@@ -24,11 +25,13 @@ class Bineos {
   // Add external hook
   on(modificatorName, modificatorFunction) {
     switch (modificatorName) {
-      case loadPlacement:
+      case "preparePlacement":
+        return this.onPreparePlacement.push(modificatorFunction);
+      case "loadPlacement":
         return this.onLoadPlacement.push(modificatorFunction);
-      case compileTemplate:
+      case "compileTemplate":
         return this.onCompileTemplate.push(modificatorFunction);
-      case outputTemplate:
+      case "outputTemplate":
         return this.onOutputTemplate.push(modificatorFunction);
     }
   }

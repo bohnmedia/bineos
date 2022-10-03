@@ -1,6 +1,8 @@
 class BineosPlacement {
   constructor(bineosClass) {
     this.bineosClass = bineosClass;
+    this.data = {};
+    this.extVar = {};
 
     // Generate callback id
     this.callbackId = bineosClass.generateUid();
@@ -15,7 +17,7 @@ class BineosPlacement {
 
   hook(name) {
     // Global modificators
-    this.bineosClass[name].forEach((modificator) => modificator.apply(this));
+    this.bineosClass[name].forEach((modificator) => modificator.apply(null, [this]));
 
     // Placement modificators
     if (!this.data[name]) return;
@@ -23,19 +25,39 @@ class BineosPlacement {
     modificators.forEach((modificator) => {
       const modificatorArguments = modificator.split(/\s*\|\s*/);
       const modificatorName = modificatorArguments.shift();
+      modificatorArguments.unshift(this);
       try {
-        this[modificatorName].apply(this, modificatorArguments);
+        this[modificatorName].apply(null, modificatorArguments);
       } catch (error) {
         console.error(error);
       }
     });
   }
 
-  callback(data) {
-    this.data = data;
+  async callback(data) {
+    Object.assign(this.data, data);
+
+    this.data.templateSrc = this.target ? this.target.getAttribute("template-src") : null;
+    this.data.templateId = this.target ? this.target.getAttribute("template-id") : null;
+    this.data.replace = this.target ? this.target.hasAttribute("replace") : null;
 
     // Run onParseTemplate hook
     this.hook("onLoadPlacement");
+
+    // Template from file
+    if (this.data.templateSrc) {
+      let response = await fetch(this.data.templateSrc);
+      if (response.status === 200) {
+        let html = await response.text();
+        this.data.html = html;
+      }
+    }
+
+    // Template from tag
+    if (this.data.templateId) {
+      let templateTag = document.querySelector("#" + this.data.templateId + '[type="text/bineos-template"]');
+      if (templateTag) this.data.html = templateTag.text;
+    }
 
     // Compile template
     this.template = BineosTemplate.compile(this.data.html);
@@ -48,7 +70,15 @@ class BineosPlacement {
     // Move html to target
     if (this.target) {
       while (this.container.firstChild) {
-        this.target.appendChild(this.container.firstChild);
+        if (this.replace) {
+          this.target.parentNode.insertBefore(this.container.firstChild, this.target);
+        } else {
+          this.target.appendChild(this.container.firstChild);
+        }
+      }
+      if (this.replace) {
+        this.target.parentNode.removeChild(this.target);
+        delete this.target;
       }
     }
 
@@ -60,31 +90,35 @@ class BineosPlacement {
   }
 
   load(zoneUid) {
+    this.zoneUid = zoneUid;
+
     // Generate request base url
     const url = new URL("https://ad." + this.bineosClass.containerDomain);
     url.pathname = "/request.php";
     url.searchParams.set("zone", zoneUid);
 
-    // Location of callback function for extVar
-    const callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";
+    // Global extVars
+    Object.assign(this.extVar, this.bineosClass.extVar);
 
     // Extvars from target
-    const targetExtVar = {};
     if (this.target) {
       [...this.target.attributes].forEach((attr) => {
         const split = attr.name.split("-");
         if ("extvar" === split[0] && split.length > 1) {
-          targetExtVar[split.slice(1).join("-")] = attr.nodeValue;
+          this.extVar[split.slice(1).join("-")] = attr.nodeValue;
         }
       });
     }
 
-    // Bundle all extvars in an object
-    const extVar = Object.assign({ callback }, this.bineosClass.extVar, targetExtVar);
+    // Location of callback function for extVar
+    this.extVar.callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";
+
+    // Run onPreparePlacement hook
+    this.hook("onPreparePlacement");
 
     // Set global extvars from
-    for (const key in extVar) {
-      const value = extVar[key];
+    for (const key in this.extVar) {
+      const value = this.extVar[key];
       url.searchParams.append("extVar[]", key + ":" + value);
     }
 
