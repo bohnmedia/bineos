@@ -45,8 +45,6 @@ class BineosPlacement {
   async callback(data) {
     Object.assign(this.data, data);
 
-    this.data.replace = this.target ? this.target.hasAttribute("replace") : null;
-
     // Run onParseTemplate hook
     this.hook("onLoadPlacement");
 
@@ -116,9 +114,10 @@ class BineosPlacement {
       });
     }
 
-    // Templates from target
+    // Options from target
     this.templateSrc = this.target ? this.target.getAttribute("template-src") : null;
     this.templateId = this.target ? this.target.getAttribute("template-id") : null;
+    this.replace = this.target ? this.target.getAttribute("replace") : null;
 
     // Location of callback function for extVar
     this.extVar.callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";
