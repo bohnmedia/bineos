@@ -1,0 +1,20 @@
+{
+  "name": "bineos",
+  "version": "1.0.0",
+  "description": "Bineos javascript class",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bohnmedia/bineos.git"
+  },
+  "author": "bohn.media",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bohnmedia/bineos/issues"
+  },
+  "homepage": "https://github.com/bohnmedia/bineos#readme",
+  "devDependencies": {
+    "@node-minify/core": "^7.0.0",
+    "@node-minify/uglify-js": "^7.0.0",
+    "gulp": "^4.0.2"
+  }
+}

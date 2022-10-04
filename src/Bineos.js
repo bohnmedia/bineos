@@ -48,13 +48,20 @@ class Bineos {
   }
 
   channelTracker(channelTrackerId, parameters = {}) {
-    const url = new URL('https://tm.' + this.containerDomain + '/tm/a/channel/tracker/' + channelTrackerId);
+    const url = new URL("https://tm." + this.containerDomain + "/tm/a/channel/tracker/" + channelTrackerId);
     for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
-    fetch(url,{mode: 'no-cors', cache: 'no-cache'});
+    fetch(url, { mode: "no-cors", cache: "no-cache" });
   }
 
   articleScore(parameters) {
     this.channelTracker(this.asConfigChannelTrackerId, parameters);
+  }
+
+  loadCSS(href) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
   }
 
   // Load the bineos script
