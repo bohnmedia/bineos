@@ -721,3 +721,34 @@ BineosTemplate = (() => {
 
   return Template7;
 })();
+
+BineosTemplate.registerHelper('dateFormat', function (dateString){
+  const d = new Date(dateString);
+  const dateSuffix = () => {
+    const s = ["th", "st", "nd", "rd"], v = d.getDate() % 100;
+    return d.getDate() + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+  const dayOfYear = () => Math.floor((d-new Date(d.getFullYear(),0,0))/1000/60/60/24);
+  dParts = {
+    d: ('0'+d.getDate()).slice(-2),
+    D: ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()],
+    j: d.getDate(),
+    l: ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][d.getDay()],
+    N: (d.getDate()+6)%7+1,
+    S: dateSuffix(),
+    w: d.getDay(),
+    z: dayOfYear(),
+    Y: d.getFullYear(),
+    G: d.getHours(),
+    g: (d.getHours()+11)%12+1,
+    H: ('0'+d.getHours()).slice(-2),
+    h: ('0'+((d.getHours()+11)%12+1)).slice(-2),
+    i: ('0'+d.getMinutes()).slice(-2),
+    s: ('0'+d.getSeconds()).slice(-2),
+    v: d.getMilliseconds(),
+    a: d.getHours()<12?'am':'pm',
+    A: d.getHours()<12?'AM':'PM',
+    U: Math.floor(d.getTime()/1000)
+  };
+  return "";
+});

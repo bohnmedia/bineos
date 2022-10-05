@@ -3,9 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Bineos Test</title>
-    <script src="classes/Bineos.js"></script>
-    <script src="classes/BineosTemplate.js"></script>
-    <script src="classes/BineosPlacement.js"></script>
+    <script src="dist/bineos.js"></script>
   </head>
   <body>
     <bineos-zone uid="tsmo807r2e0c" extvar-type="1"></bineos-zone>
@@ -18,6 +16,7 @@
         <img src="{{this.imageSmall}}">
         <p>{{this.teaser}}</p>
         <a href="{{this.clickurl}}">mehr ...</a>
+        <p>{{dateFormat this.priceBase}}</p>
       {{/each}}
     </script>
 
