@@ -3,7 +3,7 @@ const BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
 class Bineos {
   constructor(containerId, containerDomain) {
     this.containerId = containerId;
-    this.containerDomain = containerDomain || BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net";
+    this.containerDomain = containerDomain || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
     this.ntmName = "_bineos" + this.generateUid();
     this.className = "_bineos" + this.generateUid();
     this.dataLayer = {};
