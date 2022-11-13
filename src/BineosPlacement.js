@@ -24,18 +24,35 @@ class BineosPlacement {
   }
 
   hook(name) {
-    // Global modificators
+    // Run global modificators
     this.bineosClass[name].forEach((modificator) => modificator.apply(null, [this]));
 
-    // Placement modificators
+    // Get modificators from placement
     if (!this.data[name]) return;
-    const modificators = this.data[name].trim().split(/\s*;\s*/);
+    const modificators = this.data[name]
+      .trim()
+      .split(/\s*,\s*/)
+      .map((strModificator) => {
+        const match = strModificator.match(/^(\w*)\((.+)\)$/);
+        const objModificator = {
+          name: match ? match[1] : strModificator,
+          args: [],
+        };
+        if (match) {
+          try {
+            objModificator.args = JSON.parse("[" + match[2] + "]");
+          } catch (error) {
+            console.error(error);
+          }
+        }
+        objModificator.args.unshift(this);
+        return objModificator;
+      });
+
+    // Run placement modificators
     modificators.forEach((modificator) => {
-      const modificatorArguments = modificator.split(/\s*\|\s*/);
-      const modificatorName = modificatorArguments.shift();
-      modificatorArguments.unshift(this);
       try {
-        this[modificatorName].apply(null, modificatorArguments);
+        this[modificator.name].apply(null, modificator.args);
       } catch (error) {
         console.error(error);
       }
@@ -57,10 +74,15 @@ class BineosPlacement {
       }
     }
 
-    // Template from tag
+    // Template from tag by id
     if (this.templateId) {
       let templateTag = document.querySelector("#" + this.templateId + '[type="text/bineos-template"]');
       if (templateTag) this.data.html = templateTag.text;
+    }
+
+    // Template from embedded tag
+    if (this.templateTag) {
+      this.data.html = this.templateTag.text;
     }
 
     // Compile template
@@ -115,9 +137,12 @@ class BineosPlacement {
     }
 
     // Options from target
-    this.templateSrc = this.target ? this.target.getAttribute("template-src") : null;
-    this.templateId = this.target ? this.target.getAttribute("template-id") : null;
-    this.replace = this.target ? this.target.getAttribute("replace") : null;
+    if (this.target) {
+      this.templateSrc = this.target.getAttribute("template-src");
+      this.templateId = this.target.getAttribute("template-id");
+      this.templateTag = this.target.querySelector('script[type="text/bineos-template"]');
+      this.replace = this.target.getAttribute("replace");
+    }
 
     // Location of callback function for extVar
     this.extVar.callback = this.bineosClass.className + ".callback['" + this.callbackId + "']";
