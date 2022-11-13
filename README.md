@@ -1,4 +1,5 @@
 # Bineos Callback 2.0
+
 Die Bineos Callback 2.0 führt Funktionen der bisher lokal beim Kunden eingebundenen Bineos-Klasse mit Funktionen zusammen, die Bisher über den Tag Manager realisiert wurden.
 
 Die Klasse verfolgt dabei folgende Ziele:
@@ -6,6 +7,22 @@ Die Klasse verfolgt dabei folgende Ziele:
 - Ladezeiten reduzieren
 - Mehr Flexibilität bei Steuerung und Darstellung von Placements
 - Ein zentraler Basiscode für alle Kunden
+
+## Einrichtung der Bineos-Klasse im Tag-Manager
+
+Damit die Bineos-Klasse im Tag-Manager verwendet werden kann, muss ein Makro eingerichtet werden, das den dynamischen Namen der Bineos-Klasse enthält. Dieser wird automatisch als DataLayer-Variable an den Tag-Manager übergeben und trägt den Namen "className".
+
+<img width="490" alt="image" src="https://user-images.githubusercontent.com/87128053/201545069-b6db52fb-f4f0-4331-91f5-e6ef540dcb57.png">
+
+Im Anschluss wird ein Tag erstellt, der das Laden der Placements anstößt.
+
+```javascript
+((bineos) => {
+
+  bineos.loadPlacements();
+
+})(window['{{className}}']);
+```
 
 ## Einbindung der neuen Bineos-Klasse auf der Kundenwebseite
 
@@ -240,4 +257,105 @@ Gibt man dem Script-Tag eine ID, kann diese über das Attribut "template-id" ver
 
 ```html
 <bineos-zone uid="tsmo807r2e0c" template-src="https://office.bohn.media/bineos/test.tpl"></bineos-zone>
+```
+
+## Hooks
+
+Hooks erlauben es, Veränderungen an einem Placement vorzunehmen, während sie geladen werden. Wurden Hooks definiert, werden sie für alle Placements ausgeführt. Möchte man Hooks nur für bestimmte Werbemittel verwenden, muss dies mit IF-Abfragen innerhalb des Hooks geschehen.
+
+Folgende Hooks stehen zur Verfügung.
+
+- **onPreparePlacement** wird ausgeführt, bevor das Placement vom Adserver geladen wird. An dieser Stelle setzt man an, wenn man Veränderungen an den ExtVars vornehmen möchte.
+- **onLoadPlacement** wird ausgeführt, nachdem die Daten des Placements geladen, jedoch bevor das Template geladen wurde. An dieser Stelle setzt man an, wenn man das verwendete Template ändern möchte.
+- **onCompileTemplate** wird ausgeführt, nachdem das Template kompiliert wurde, jedoch bevor es in die Seite gerendert wird. An dieser Stelle lassen sich Änderungen am DOM vornehmen, bevor er sichtbar ist.
+- **onOutputTemplate** wird ausgeführt, nachdem das Template in die Seite gerendert wurde.
+
+Hooks lassen sich wie folgt definieren.
+
+### Hooks über Bineos-Tag
+
+Über den Bineos-Tag haben Kunden selbst die Möglichkeit, Hooks hinzuzufügen. Dafür wird die Methode "on" wie folgt verwendet.
+
+```javascript
+// onPreparePlacement
+bineos.on("loadPlacement", (placement) => {
+  console.log("Bereite das Placement vor", placement));
+});
+
+// onLoadPlacement
+bineos.on("loadPlacement", (placement) => {
+  console.log("Lade Placement", placement));
+});
+
+// onCompileTemplate
+bineos.on("compileTemplate", (placement) => {
+  console.log("Kompiliere Template", placement));
+});
+
+// onOutputTemplate
+bineos.on("outputTemplate", (placement) => {
+  console.log("Gebe Template aus", placement));
+});
+```
+
+### Hooks über Tag-Manager
+
+Hooks lassen sich auch zentral über den Tag-Manager pflegen. Im folgenden Beispiel modifizieren wir für Placements, die über die zoneUid "abcdefg" ausgespielt werden, den HTML-Code.
+
+```javascript
+((bineos) => {
+
+  // onLoadPlacement für zoneUid "abcdefg"
+  bineos.on("loadPlacement", (placement) => {
+    if (placement.zoneUid !== "abcdefg") return;
+    placement.html = "Hello World!";
+  });
+
+  bineos.loadPlacements();
+  
+})(window['{{className}}']);
+```
+
+### Hooks über Placements
+
+Alternativ zu globalen Hooks, die über den Bineos-Tag definiert werden, können Hooks auch innerhalb eines Placements definiert werden. Das passier über entsprechende Variablen im Werbemittel-Template.
+
+<img width="467" alt="image" src="https://user-images.githubusercontent.com/87128053/201547426-97d0a1ed-cc1f-491e-9d55-fa7f8f0db6a5.png">
+
+Die die Template-Variablen sich nicht zur Übergabe von JavaScript eigenen, und damit das Ganze auch vom Kunden pflegbar ist, werden anstelle von kompletten JavaScript-Funktionen die Namen bereits hinterlegter Funktionen übergeben. Über eine Klammer am Ende können zudem Parameter mitgegeben werden. Sollten Strings als Parameter übergeben werden, müssen diese in doppelten Anführungszeichen gesetzt sein. Die Namen werden durch ein Kommas getrennt. Leerzeichen vor und nach dem Komma sind optional.
+
+Folgende Funktionen stehen defaultmäßig zur Verfügung.
+
+- **shuffle** Bringt die Items im ProductLoop in eine zufällige Reihenfolge.
+- **limit(x)** Bringt die Items im ProductLoop auf eine maximale Anzahl von x Artikeln.
+
+### Eigene Funktionen für Hooks definieren
+
+Um eigene Funktionen zu definieren, ergänzt man im Bineos-Tag das Objekt "placementFunctions". Schauen wir uns als Beispiel die Funktion "limit" an.
+
+```javascript
+this.placementFunctions.limit = (placement, limit) => {
+  placement.data.productLoop.splice(limit);
+};
+```
+
+Das erste Argument ist immer das Objekt des Placements, für das der Hook getriggert wird. Über das lassen sich Veränderungen am Placement vornehmen. In diesem Falle wird der ProductLoop auf x Items reduziert. Die Anzahl der Items wird über die Klammer im Placement definiert.
+
+<img width="467" alt="image" src="https://user-images.githubusercontent.com/87128053/201547426-97d0a1ed-cc1f-491e-9d55-fa7f8f0db6a5.png">
+
+Die Anzahl der Argumente lässt sich beliebig erweitern.
+
+## ChannelTracker
+
+Zudem wurde die Bineos Callback um eine Funktion erweitert, die das Schreiben in den ChannelTracker erleichtern soll. Dazu wird der Methode "channelTracker" aufgerufen. Das erste Argument beinhaltet die ChannelTracker-ID, das zweite Argument ein Objekt mit den gewünschten Werten.
+
+```javascript
+bineos.channelTracker('12345678', {pi: '{{asData}}_d{{asTimestamp}}_t0'});
+```
+
+Für das Schreiben in den ArticleScore steht zudem die Methode "articleScore" zur Verfügung. Damit diese funktioniert, muss einmalig die Variable "asConfigChannelTrackerId" gesetzt werden.
+
+```javascript
+bineos.asConfigChannelTrackerId = '12345678';
+bineos.articleScore({pi: '{{asData}}_d{{asTimestamp}}_t0'});
 ```
