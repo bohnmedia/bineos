@@ -11,6 +11,7 @@
 		"onCompileTemplate" : "[onCompileTemplate]",
 		"onOutputTemplate"  : "[onOutputTemplate]",
 		"zoneUid"           : "[ZONEUID]",
+    	"html"              : [HTML|JSONIFY]
     };
 
     [IF-HTML]
@@ -47,11 +48,12 @@
 		attribute6       : [PRODUCTLOOP-ATTRIBUTE-6|JSONIFY]
 	});
 	[/PRODUCTLOOP]
-    data.html = [HTML|JSONIFY];
     [/IF-HTML]
 
     [IF-STANDARD]
-    data.html = '<a href="{{clickurl}}" target="_blank"><img style="max-width:100%;height:auto;vertical-align:middle" src="{{imageurl}}"></a>';
+    if (!data.html) {
+        data.html = '<a href="{{clickurl}}" target="_blank"><img style="max-width:100%;height:auto;vertical-align:middle" src="{{imageurl}}"></a>';
+    }
     [/IF-STANDARD]
 
 	[EXTVAR_CALLBACK](data);
