@@ -211,3 +211,33 @@ Die einfachste Art, den HTML-Code für ein Placement zu definieren, ist es diese
 
 <img width="653" alt="image" src="https://user-images.githubusercontent.com/87128053/201539230-60e50dbd-3189-4eb9-9e3d-c1e750da6736.png">
 
+#### HTML-Code per eingebettetem Script-Tag
+
+Fügt man in den Bineos-Zone-Tag einen Script-Tag vom Typ "text/bineos-template" ein, wird der darin enthaltene HTML-Code als Template verwendet.
+
+```html
+<bineos-zone uid="tsmo807r2e0c">
+  <script type="text/bineos-template">
+    <a href="{{clickurl}}"><img src="{{imageurl}}"></a>
+  </script>
+</bineos-zone>
+```
+
+#### HTML-Code per externem Script-Tag
+
+Gibt man dem Script-Tag eine ID, kann diese über das Attribut "template-id" verknüpft werden.
+
+```html
+<bineos-zone uid="tsmo807r2e0c" template-id="mein-template"></bineos-zone>
+<script type="text/bineos-template" id="mein-template">
+  <a href="{{clickurl}}"><img src="{{imageurl}}"></a>
+</script>
+```
+
+#### HTML-Code über externe Datei
+
+Über das Attribut "template-src" kann eine URL angegeben werden, über die das Template geladen werden soll.
+
+```html
+<bineos-zone uid="tsmo807r2e0c" template-src="https://office.bohn.media/bineos/test.tpl"></bineos-zone>
+```
