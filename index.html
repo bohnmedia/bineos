@@ -28,12 +28,6 @@
 
         bineos.extVar.touchpoint = "startpage";
 
-        bineos.on("loadPlacement", (placement) => {
-          if (placement.zoneUid === "tsmo807r2e0c" && placement.extVar.type === "3") {
-            placement.templateId = "bineos-test";
-          }
-        });
-
         bineos.loadCSS("style.css");
 
         bineos.init();
