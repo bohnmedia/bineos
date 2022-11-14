@@ -14,11 +14,22 @@ class Bineos {
     this.onLoadPlacement = [];
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
+    this.placementFunctions = {};
 
     // Read get parameters
     for (const [key, value] of new URL(window.location.href).searchParams.entries()) {
       this.getParameter[key] = value;
     }
+
+    // Custom function shuffle
+    this.placementFunctions.shuffle = (placement) => {
+      placement.data.productLoop.sort((a, b) => Math.random() - 0.5);
+    };
+
+    // Custom function limit
+    this.placementFunctions.limit = (placement, limit) => {
+      placement.data.productLoop.splice(limit);
+    };
 
     // Make this class global
     window[this.className] = this;

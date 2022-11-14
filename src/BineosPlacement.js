@@ -11,48 +11,34 @@ class BineosPlacement {
     this.bineosClass.callback[this.callbackId] = this.callback.bind(this);
   }
 
-  clickurl(url) {
-    return this.data["rd_click_enc"] + encodeURIComponent(url);
-  }
-
-  shuffle(placement) {
-    placement.data.productLoop.sort((a, b) => Math.random() - 0.5);
-  }
-
-  limit(placement, limit) {
-    placement.data.productLoop.splice(limit);
+  hookParser(modificators) {
+    if (!modificators) return [];
+    const container = document.createElement("div");
+    const attributes = [];
+    container.innerHTML = "<bineos-parser " + modificators + "></bineos-parser>";
+    const parser = container.querySelector("bineos-parser");
+    for (let i = 0; i < parser.attributes.length; i++) {
+      try {
+        attributes.push({
+          name: parser.attributes[i].name,
+          args: JSON.parse("[" + parser.attributes[i].value + "]"),
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return attributes;
   }
 
   hook(name) {
     // Run global modificators
     this.bineosClass[name].forEach((modificator) => modificator.apply(null, [this]));
 
-    // Get modificators from placement
-    if (!this.data[name]) return;
-    const modificators = this.data[name]
-      .trim()
-      .split(/\s*,\s*/)
-      .map((strModificator) => {
-        const match = strModificator.match(/^(\w*)\((.+)\)$/);
-        const objModificator = {
-          name: match ? match[1] : strModificator,
-          args: [],
-        };
-        if (match) {
-          try {
-            objModificator.args = JSON.parse("[" + match[2] + "]");
-          } catch (error) {
-            console.error(error);
-          }
-        }
-        objModificator.args.unshift(this);
-        return objModificator;
-      });
-
     // Run placement modificators
-    modificators.forEach((modificator) => {
+    this.hookParser(this.data[name]).forEach((modificator) => {
       try {
-        this[modificator.name].apply(null, modificator.args);
+        modificator.args.unshift(this);
+        this.bineosClass.placementFunctions[modificator.name].apply(null, modificator.args);
       } catch (error) {
         console.error(error);
       }
