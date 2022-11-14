@@ -21,7 +21,7 @@ class BineosPlacement {
       try {
         attributes.push({
           name: parser.attributes[i].name,
-          args: JSON.parse("[" + parser.attributes[i].value + "]"),
+          args: parser.attributes[i].value ? parser.attributes[i].value.split(",") : [],
         });
       } catch (error) {
         console.error(error);
