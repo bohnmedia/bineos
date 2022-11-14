@@ -334,7 +334,7 @@ Folgende Funktionen stehen defaultmäßig zur Verfügung.
 Um eigene Funktionen zu definieren, ergänzt man im Bineos-Tag das Objekt "placementFunctions". Schauen wir uns als Beispiel die Funktion "limit" an.
 
 ```javascript
-this.placementFunctions.limit = (placement, limit) => {
+bineos.placementFunctions.limit = (placement, limit) => {
   placement.data.productLoop.splice(limit);
 };
 ```
