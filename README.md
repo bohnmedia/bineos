@@ -320,9 +320,9 @@ Hooks lassen sich auch zentral über den Tag-Manager pflegen. Im folgenden Beisp
 
 Alternativ zu globalen Hooks, die über den Bineos-Tag definiert werden, können Hooks auch innerhalb eines Placements definiert werden. Das passier über entsprechende Variablen im Werbemittel-Template.
 
-<img width="467" alt="image" src="https://user-images.githubusercontent.com/87128053/201547426-97d0a1ed-cc1f-491e-9d55-fa7f8f0db6a5.png">
+<img width="395" alt="image" src="https://user-images.githubusercontent.com/87128053/201552320-3778263d-9784-49bf-ba71-bccbc4dddffc.png">
 
-Die die Template-Variablen sich nicht zur Übergabe von JavaScript eigenen, und damit das Ganze auch vom Kunden pflegbar ist, werden anstelle von kompletten JavaScript-Funktionen die Namen bereits hinterlegter Funktionen übergeben. Über eine Klammer am Ende können zudem Parameter mitgegeben werden. Sollten Strings als Parameter übergeben werden, müssen diese in doppelten Anführungszeichen gesetzt sein. Die Namen werden durch ein Kommas getrennt. Leerzeichen vor und nach dem Komma sind optional.
+Die die Template-Variablen sich nicht zur Übergabe von JavaScript eigenen, und damit das Ganze auch vom Kunden pflegbar ist, werden anstelle von kompletten JavaScript-Funktionen die Namen bereits hinterlegter Funktionen übergeben. Die Namen werden per Leerzeichen getrennt. Über das Gleichzeichen können der Funktion zusätzliche Argumente mitgegeben werden.
 
 Folgende Funktionen stehen defaultmäßig zur Verfügung.
 
@@ -339,11 +339,11 @@ this.placementFunctions.limit = (placement, limit) => {
 };
 ```
 
-Das erste Argument ist immer das Objekt des Placements, für das der Hook getriggert wird. Über das lassen sich Veränderungen am Placement vornehmen. In diesem Falle wird der ProductLoop auf x Items reduziert. Die Anzahl der Items wird über die Klammer im Placement definiert.
+Das erste Argument ist immer das Objekt des Placements, für das der Hook getriggert wird. Über das lassen sich Veränderungen am Placement vornehmen. In diesem Falle wird der ProductLoop auf x Items reduziert.
 
-<img width="467" alt="image" src="https://user-images.githubusercontent.com/87128053/201547426-97d0a1ed-cc1f-491e-9d55-fa7f8f0db6a5.png">
+<img width="395" alt="image" src="https://user-images.githubusercontent.com/87128053/201552320-3778263d-9784-49bf-ba71-bccbc4dddffc.png">
 
-Die Anzahl der Argumente lässt sich beliebig erweitern.
+Die Anzahl der Argumente lässt sich kommagetrennt beliebig erweitern.
 
 ## ChannelTracker
 
