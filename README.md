@@ -277,22 +277,22 @@ Hooks lassen sich wie folgt definieren.
 Über den Bineos-Tag haben Kunden selbst die Möglichkeit, Hooks hinzuzufügen. Dafür wird die Methode "on" wie folgt verwendet.
 
 ```javascript
-// onPreparePlacement
-bineos.on("loadPlacement", (placement) => {
+// preparePlacement
+bineos.on("preparePlacement", (placement) => {
   console.log("Bereite das Placement vor", placement));
 });
 
-// onLoadPlacement
+// loadPlacement
 bineos.on("loadPlacement", (placement) => {
   console.log("Lade Placement", placement));
 });
 
-// onCompileTemplate
+// compileTemplate
 bineos.on("compileTemplate", (placement) => {
   console.log("Kompiliere Template", placement));
 });
 
-// onOutputTemplate
+// outputTemplate
 bineos.on("outputTemplate", (placement) => {
   console.log("Gebe Template aus", placement));
 });
