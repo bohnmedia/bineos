@@ -316,9 +316,9 @@ Hooks lassen sich auch zentral über den Tag-Manager pflegen. Im folgenden Beisp
 })(window['{{className}}']);
 ```
 
-### Hooks über Placements
+### Hooks über Werbemittel
 
-Alternativ zu globalen Hooks, die über den Bineos-Tag definiert werden, können Hooks auch innerhalb eines Placements definiert werden. Das passier über entsprechende Variablen im Werbemittel-Template.
+Alternativ zu globalen Hooks, die über den Bineos-Tag definiert werden, können Hooks auch innerhalb eines Werbemittels definiert werden. Das passiert über entsprechende Variablen im Werbemittel-Template.
 
 <img width="395" alt="image" src="https://user-images.githubusercontent.com/87128053/201552320-3778263d-9784-49bf-ba71-bccbc4dddffc.png">
 
