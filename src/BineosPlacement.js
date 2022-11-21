@@ -45,19 +45,35 @@ class BineosPlacement {
     });
   }
 
+  loadTemplate(src) {
+    if (!src) return { src };
+    return {
+      src,
+      data: new Promise((resolve, reject) => {
+        fetch(src)
+          .then((response) => response.text())
+          .then((template) => resolve(template));
+      })
+    };
+  }
+
   async callback(data) {
     Object.assign(this.data, data);
 
-    // Run onParseTemplate hook
+    // Wait for css and js dependencies
+    await this.dependenciesLoaded;
+
+    // Run onLoadPlacement hook
     this.hook("onLoadPlacement");
 
-    // Template from file
-    if (this.templateSrc) {
-      let response = await fetch(this.templateSrc);
-      if (response.status === 200) {
-        let html = await response.text();
-        this.data.html = html;
-      }
+    // Was templateSrc changed in onLoadPlacement hook?
+    if (this.templateSrc !== this.externalTemplate.src) {
+      this.externalTemplate = this.loadTemplate(this.templateSrc);
+    }
+
+    // Load data from external template
+    if (this.externalTemplate.src) {
+      this.data.html = await this.externalTemplate.data;
     }
 
     // Template from tag by id
@@ -135,6 +151,9 @@ class BineosPlacement {
 
     // Run onPreparePlacement hook
     this.hook("onPreparePlacement");
+
+    // Load external template when templateSrc was set
+    this.externalTemplate = this.loadTemplate(this.templateSrc);
 
     // Set global extvars from
     for (const key in this.extVar) {

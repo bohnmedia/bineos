@@ -1,7 +1,7 @@
-const BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
-
 class Bineos {
   constructor(containerId, containerDomain) {
+    const BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
+
     this.containerId = containerId;
     this.containerDomain = containerDomain || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
     this.ntmName = "_bineos" + this.generateUid();
@@ -38,15 +38,27 @@ class Bineos {
   // Add external hook
   on(modificatorName, modificatorFunction) {
     const key = "on" + modificatorName.charAt(0).toUpperCase() + modificatorName.substring(1);
+    if (!this[key]) return console.error('BINEOS: Hook "' + key + '" does not exist');
     this[key].push(modificatorFunction);
   }
 
+  // Generate an uid starting with a letter
   generateUid() {
-    // Generate an uid starting with a letter
     return Math.random().toString(16).slice(2);
   }
 
-  loadPlacements() {
+  // Load CSS and JS files for placements
+  loadPlacementDependencies(options) {
+    const promisses = [];
+    if (options.css) options.css.forEach((href) => promisses.push(this.loadCSS(href)));
+    if (options.js) options.js.forEach((src) => promisses.push(this.loadJS(src)));
+    return Promise.all(promisses);
+  }
+
+  loadPlacements(options = {}) {
+    // Load CSS and JS files for placements
+    const dependenciesLoaded = this.loadPlacementDependencies(options);
+
     // Load placements based on containers
     document.querySelectorAll("bineos-zone[uid]").forEach((node) => {
       const uid = node.getAttribute("uid");
@@ -54,6 +66,9 @@ class Bineos {
 
       // Set placement target
       placement.target = node;
+
+      // Add promise for dependency loader
+      placement.dependenciesLoaded = dependenciesLoaded;
 
       // Load placement
       placement.load(uid);
@@ -74,7 +89,20 @@ class Bineos {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
-    document.head.appendChild(link);
+    return new Promise((resolve, reject) => {
+      link.addEventListener("load", resolve);
+      document.head.appendChild(link);
+    });
+  }
+
+  loadJS(src) {
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = src;
+    return new Promise((resolve, reject) => {
+      script.addEventListener("load", resolve);
+      document.head.appendChild(script);
+    });
   }
 
   // Load the bineos script
