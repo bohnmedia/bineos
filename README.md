@@ -345,6 +345,21 @@ Das erste Argument ist immer das Objekt des Placements, für das der Hook getrig
 
 Die Anzahl der Argumente lässt sich kommagetrennt beliebig erweitern.
 
+## JS und CSS für Placements nachladen
+
+In bestimmten Fällen kann es sinnvoll sein, Dateien zur Darstellung der Placements nachzuladen. Beispielsweise eine CSS-Datei, damit die Styles nicht alle per Tag-Manager ausgeliefert werden müssen oder eine JS-Library, die innerhalb eines Werbemittels genutzt wird.
+
+Dazu kann im Tag-Manager die Funktion "loadPlacement" zum Laden der Placements um ein Array aus URLs erweitert werden, die auf CSS- und JS-Dateien zeigen.
+
+```javascript
+  bineos.loadPlacements({
+    'css': ['https://www.foo.tld/style.css'],
+    'js': ['https://www.foo.tld/test.js.php']
+  });
+```
+
+Der Vorteil dieser Lösung ist, dass CSS und JS parallel zu den Werbemitteln geladen werden, die Werbemittel aber erst dann gerendert werden, wenn CSS und JS vollständig geladen wurden. Das minimiert die Ladezeit und stellt dennoch sicher, dass es nicht zu Darstellungsfehlern während des Ladeprozesses kommt.
+
 ## ChannelTracker
 
 Zudem wurde die Bineos Callback um eine Funktion erweitert, die das Schreiben in den ChannelTracker erleichtern soll. Dazu wird der Methode "channelTracker" aufgerufen. Das erste Argument beinhaltet die ChannelTracker-ID, das zweite Argument ein Objekt mit den gewünschten Werten.
