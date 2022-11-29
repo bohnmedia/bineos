@@ -4,7 +4,7 @@ const minify = require("@node-minify/core");
 const uglifyjs = require("@node-minify/uglify-js");
 
 gulp.task("generateJs", () => {
-  const src = ["src/Bineos.js", "src/BineosPlacement.js", "src/BineosTemplate.js"];
+  const src = ["src/Bineos.js", "src/BineosRequest.js", "src/BineosPlacement.js", "src/BineosTemplate.js"];
   for (const i in src) src[i] = fs.readFileSync(src[i]);
   fs.writeFileSync("dist/bineos.js", src.join("\n"));
   minify({

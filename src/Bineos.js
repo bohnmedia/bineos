@@ -1,9 +1,7 @@
-const BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
-
 class Bineos {
-  constructor(containerId, containerDomain) {
+  constructor(containerId, containerHostname) {
     this.containerId = containerId;
-    this.containerDomain = containerDomain || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
+    this.containerHostname = containerHostname || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
     this.ntmName = "_bineos" + this.generateUid();
     this.className = "_bineos" + this.generateUid();
     this.dataLayer = {};
@@ -15,6 +13,7 @@ class Bineos {
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
     this.placementFunctions = {};
+    this.request = new Bineos.Request('ad.' + this.containerHostname);
 
     // Read get parameters
     for (const [key, value] of new URL(window.location.href).searchParams.entries()) {
@@ -62,7 +61,7 @@ class Bineos {
     // Load placements based on containers
     document.querySelectorAll("bineos-zone[uid]").forEach((node) => {
       const uid = node.getAttribute("uid");
-      const placement = new BineosPlacement(this);
+      const placement = new Bineos.Placement(this);
 
       // Set placement target
       placement.target = node;
@@ -76,7 +75,7 @@ class Bineos {
   }
 
   channelTracker(channelTrackerId, parameters = {}) {
-    const url = new URL("https://tm." + this.containerDomain + "/tm/a/channel/tracker/" + channelTrackerId);
+    const url = new URL("https://tm." + this.containerHostname + "/tm/a/channel/tracker/" + channelTrackerId);
     for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
     fetch(url, { mode: "no-cors", cache: "no-cache" });
   }
@@ -117,7 +116,7 @@ class Bineos {
     window[this.ntmName] = [this.dataLayer, { event: "ntmInit", t: new Date().getTime() }];
 
     // Generate the script url
-    const url = new URL("https://tm." + this.containerDomain);
+    const url = new URL("https://tm." + this.containerHostname);
     url.pathname = "/tm/a/container/init/" + this.containerId + ".js";
     url.searchParams.set("ntmData", this.ntmName);
     url.searchParams.set("rnd", Math.floor(Math.random() * 100000000));
@@ -127,4 +126,6 @@ class Bineos {
     script.src = url.toString();
     document.head.appendChild(script);
   }
-}
+};
+
+Bineos.BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;

@@ -1,4 +1,4 @@
-class BineosPlacement {
+Bineos.Placement = class {
   constructor(bineosClass) {
     this.bineosClass = bineosClass;
     this.data = {};
@@ -47,6 +47,8 @@ class BineosPlacement {
 
   loadTemplate(src) {
     if (!src) return { src };
+
+    // Return the data as promise to allow parallel loading of template, javascript and css
     return {
       src,
       data: new Promise((resolve, reject) => {
@@ -88,7 +90,7 @@ class BineosPlacement {
     }
 
     // Compile template
-    this.template = BineosTemplate.compile(this.data.html);
+    this.template = this.bineosClass.template.compile(this.data.html);
     this.container = document.createElement("div");
     this.container.innerHTML = this.template(this.data);
 
@@ -120,11 +122,6 @@ class BineosPlacement {
   load(zoneUid) {
     this.zoneUid = zoneUid;
 
-    // Generate request base url
-    const url = new URL("https://ad." + this.bineosClass.containerDomain);
-    url.pathname = "/request.php";
-    url.searchParams.set("zone", zoneUid);
-
     // Global extVars
     Object.assign(this.extVar, this.bineosClass.extVar);
 
@@ -155,15 +152,10 @@ class BineosPlacement {
     // Load external template when templateSrc was set
     this.externalTemplate = this.loadTemplate(this.templateSrc);
 
-    // Set global extvars from
-    for (const key in this.extVar) {
-      const value = this.extVar[key];
-      url.searchParams.append("extVar[]", key + ":" + value);
-    }
-
-    // Append script to header
-    const script = document.createElement("script");
-    script.src = url.toString();
-    document.head.appendChild(script);
+    // Request
+    this.bineosClass.request.loadScript({
+      zone: zoneUid,
+      extVar: this.extVar
+    });
   }
-}
+};

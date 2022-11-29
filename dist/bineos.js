@@ -1,9 +1,7 @@
-const BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
-
 class Bineos {
-  constructor(containerId, containerDomain) {
+  constructor(containerId, containerHostname) {
     this.containerId = containerId;
-    this.containerDomain = containerDomain || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
+    this.containerHostname = containerHostname || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
     this.ntmName = "_bineos" + this.generateUid();
     this.className = "_bineos" + this.generateUid();
     this.dataLayer = {};
@@ -15,6 +13,7 @@ class Bineos {
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
     this.placementFunctions = {};
+    this.request = new Bineos.Request('ad.' + this.containerHostname);
 
     // Read get parameters
     for (const [key, value] of new URL(window.location.href).searchParams.entries()) {
@@ -62,7 +61,7 @@ class Bineos {
     // Load placements based on containers
     document.querySelectorAll("bineos-zone[uid]").forEach((node) => {
       const uid = node.getAttribute("uid");
-      const placement = new BineosPlacement(this);
+      const placement = new Bineos.Placement(this);
 
       // Set placement target
       placement.target = node;
@@ -76,7 +75,7 @@ class Bineos {
   }
 
   channelTracker(channelTrackerId, parameters = {}) {
-    const url = new URL("https://tm." + this.containerDomain + "/tm/a/channel/tracker/" + channelTrackerId);
+    const url = new URL("https://tm." + this.containerHostname + "/tm/a/channel/tracker/" + channelTrackerId);
     for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
     fetch(url, { mode: "no-cors", cache: "no-cache" });
   }
@@ -117,7 +116,7 @@ class Bineos {
     window[this.ntmName] = [this.dataLayer, { event: "ntmInit", t: new Date().getTime() }];
 
     // Generate the script url
-    const url = new URL("https://tm." + this.containerDomain);
+    const url = new URL("https://tm." + this.containerHostname);
     url.pathname = "/tm/a/container/init/" + this.containerId + ".js";
     url.searchParams.set("ntmData", this.ntmName);
     url.searchParams.set("rnd", Math.floor(Math.random() * 100000000));
@@ -127,9 +126,68 @@ class Bineos {
     script.src = url.toString();
     document.head.appendChild(script);
   }
-}
+};
 
-class BineosPlacement {
+Bineos.BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
+Bineos.Request = class {
+  constructor(hostname) {
+    this.hostname = hostname;
+  }
+
+  // Build request url from an object of parameters
+  buildUrl(parameters) {
+    const url = new URL("https://" + this.hostname + "/request.php");
+    Object.entries(parameters).forEach((entry) => {
+      const [key, value] = entry;
+
+      // Value is array
+      if (Array.isArray(value)) {
+        value.forEach((value) => url.searchParams.append(key + "[]", value));
+
+        // Value is object
+      } else if (typeof value === "object") {
+        Object.entries(value).forEach((subEntry) => {
+          const [subKey, subValue] = subEntry;
+
+          // Object item is an array
+          if (Array.isArray(subValue)) {
+            subValue.forEach((subValue) => url.searchParams.append(key + "[]", subKey + ":" + subValue));
+
+            // Object item is no array
+          } else {
+            url.searchParams.append(key + "[]", subKey + ":" + subValue);
+          }
+        });
+
+        // Value is no array
+      } else {
+        url.searchParams.append(key, value);
+      }
+    });
+    return url.toString();
+  }
+
+  // Make request as script tag
+  loadScript(parameters) {
+    const script = document.createElement("script");
+    script.src = this.buildUrl(parameters);
+    return new Promise((resolve, reject) => {
+      script.addEventListener("load", resolve);
+      document.head.appendChild(script);
+    });
+  }
+
+  // Load request output into a string
+  loadText(parameters) {
+    return new Promise((resolve, reject) => {
+      fetch(this.buildUrl(parameters))
+        .then((response) => response.text())
+        .then((data) => resolve(data));
+    });
+  }
+};
+
+Bineos.Placement = class {
   constructor(bineosClass) {
     this.bineosClass = bineosClass;
     this.data = {};
@@ -178,6 +236,8 @@ class BineosPlacement {
 
   loadTemplate(src) {
     if (!src) return { src };
+
+    // Return the data as promise to allow parallel loading of template, javascript and css
     return {
       src,
       data: new Promise((resolve, reject) => {
@@ -219,7 +279,7 @@ class BineosPlacement {
     }
 
     // Compile template
-    this.template = BineosTemplate.compile(this.data.html);
+    this.template = this.bineosClass.template.compile(this.data.html);
     this.container = document.createElement("div");
     this.container.innerHTML = this.template(this.data);
 
@@ -251,11 +311,6 @@ class BineosPlacement {
   load(zoneUid) {
     this.zoneUid = zoneUid;
 
-    // Generate request base url
-    const url = new URL("https://ad." + this.bineosClass.containerDomain);
-    url.pathname = "/request.php";
-    url.searchParams.set("zone", zoneUid);
-
     // Global extVars
     Object.assign(this.extVar, this.bineosClass.extVar);
 
@@ -286,18 +341,13 @@ class BineosPlacement {
     // Load external template when templateSrc was set
     this.externalTemplate = this.loadTemplate(this.templateSrc);
 
-    // Set global extvars from
-    for (const key in this.extVar) {
-      const value = this.extVar[key];
-      url.searchParams.append("extVar[]", key + ":" + value);
-    }
-
-    // Append script to header
-    const script = document.createElement("script");
-    script.src = url.toString();
-    document.head.appendChild(script);
+    // Request
+    this.bineosClass.request.loadScript({
+      zone: zoneUid,
+      extVar: this.extVar
+    });
   }
-}
+};
 
 /**
  * Template7 1.4.1
@@ -314,7 +364,7 @@ class BineosPlacement {
  * Released on: February 5, 2019
  */
 
-BineosTemplate = (() => {
+Bineos.prototype.template = (() => {
   "use strict";
 
   var t7ctx;
@@ -1020,33 +1070,34 @@ BineosTemplate = (() => {
   Template7.helpers = Template7Class.helpers;
   Template7.partials = Template7Class.partials;
 
+  // Helper for german dates
+  Template7.registerHelper('dateFormat', function (dateStr, format) {
+    const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    const date = new Date(dateStr);
+    const formatArr = format.split('');
+    const elements = {
+      // Day
+      d: ('0'+date.getDate()).slice(-2), // Day of the month, 2 digits with leading zeros
+      D: dayNames[date.getDay()].substring(0,2), // A textual representation of a day, two letters
+      j: date.getDate(), // Day of the month without leading zeros
+      l: dayNames[date.getDay()], // A full textual representation of the day of the week
+      w: date.getDay(), // Numeric representation of the day of the week
+      // Month
+      F: monthNames[date.getMonth()], // A full textual representation of a month, such as January or March
+      m: ('0'+(date.getMonth()+1)).slice(-2), // Numeric representation of a month, with leading zeros
+      M: monthNames[date.getMonth()].substring(0,3), // A short textual representation of a month, three letters
+      n: date.getMonth()+1, // Numeric representation of a month, without leading zeros
+      // Year
+      Y: date.getFullYear(), // A full numeric representation of a year
+      // Time
+      G: date.getHours(), // 24-hour format of an hour without leading zeros
+      H: ('0'+date.getHours()).slice(-2), // 24-hour format of an hour with leading zeros
+      i: ('0'+date.getMinutes()).slice(-2), // Minutes with leading zeros
+      s: ('0'+date.getSeconds()).slice(-2) // Seconds with leading zeros
+    };
+    return formatArr.map((v) => elements[v] ? elements[v] : v).join('');
+  });
+
   return Template7;
 })();
-
-BineosTemplate.registerHelper('dateFormat', function (dateStr, format) {
-  const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-  const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  const date = new Date(dateStr);
-  const formatArr = format.split('');
-  const elements = {
-    // Day
-    d: ('0'+date.getDate()).slice(-2), // Day of the month, 2 digits with leading zeros
-    D: dayNames[date.getDay()].substring(0,2), // A textual representation of a day, two letters
-    j: date.getDate(), // Day of the month without leading zeros
-    l: dayNames[date.getDay()], // A full textual representation of the day of the week
-    w: date.getDay(), // Numeric representation of the day of the week
-    // Month
-    F: monthNames[date.getMonth()], // A full textual representation of a month, such as January or March
-    m: ('0'+(date.getMonth()+1)).slice(-2), // Numeric representation of a month, with leading zeros
-    M: monthNames[date.getMonth()].substring(0,3), // A short textual representation of a month, three letters
-    n: date.getMonth()+1, // Numeric representation of a month, without leading zeros
-    // Year
-    Y: date.getFullYear(), // A full numeric representation of a year
-    // Time
-    G: date.getHours(), // 24-hour format of an hour without leading zeros
-    H: ('0'+date.getHours()).slice(-2), // 24-hour format of an hour with leading zeros
-    i: ('0'+date.getMinutes()).slice(-2), // Minutes with leading zeros
-    s: ('0'+date.getSeconds()).slice(-2) // Seconds with leading zeros
-  };
-  return f.map((v) => elements[v] ? elements[v] : v).join('');
-});

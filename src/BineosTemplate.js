@@ -13,7 +13,7 @@
  * Released on: February 5, 2019
  */
 
-BineosTemplate = (() => {
+Bineos.prototype.template = (() => {
   "use strict";
 
   var t7ctx;
@@ -719,33 +719,34 @@ BineosTemplate = (() => {
   Template7.helpers = Template7Class.helpers;
   Template7.partials = Template7Class.partials;
 
+  // Helper for german dates
+  Template7.registerHelper('dateFormat', function (dateStr, format) {
+    const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    const date = new Date(dateStr);
+    const formatArr = format.split('');
+    const elements = {
+      // Day
+      d: ('0'+date.getDate()).slice(-2), // Day of the month, 2 digits with leading zeros
+      D: dayNames[date.getDay()].substring(0,2), // A textual representation of a day, two letters
+      j: date.getDate(), // Day of the month without leading zeros
+      l: dayNames[date.getDay()], // A full textual representation of the day of the week
+      w: date.getDay(), // Numeric representation of the day of the week
+      // Month
+      F: monthNames[date.getMonth()], // A full textual representation of a month, such as January or March
+      m: ('0'+(date.getMonth()+1)).slice(-2), // Numeric representation of a month, with leading zeros
+      M: monthNames[date.getMonth()].substring(0,3), // A short textual representation of a month, three letters
+      n: date.getMonth()+1, // Numeric representation of a month, without leading zeros
+      // Year
+      Y: date.getFullYear(), // A full numeric representation of a year
+      // Time
+      G: date.getHours(), // 24-hour format of an hour without leading zeros
+      H: ('0'+date.getHours()).slice(-2), // 24-hour format of an hour with leading zeros
+      i: ('0'+date.getMinutes()).slice(-2), // Minutes with leading zeros
+      s: ('0'+date.getSeconds()).slice(-2) // Seconds with leading zeros
+    };
+    return formatArr.map((v) => elements[v] ? elements[v] : v).join('');
+  });
+
   return Template7;
 })();
-
-BineosTemplate.registerHelper('dateFormat', function (dateStr, format) {
-  const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-  const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  const date = new Date(dateStr);
-  const formatArr = format.split('');
-  const elements = {
-    // Day
-    d: ('0'+date.getDate()).slice(-2), // Day of the month, 2 digits with leading zeros
-    D: dayNames[date.getDay()].substring(0,2), // A textual representation of a day, two letters
-    j: date.getDate(), // Day of the month without leading zeros
-    l: dayNames[date.getDay()], // A full textual representation of the day of the week
-    w: date.getDay(), // Numeric representation of the day of the week
-    // Month
-    F: monthNames[date.getMonth()], // A full textual representation of a month, such as January or March
-    m: ('0'+(date.getMonth()+1)).slice(-2), // Numeric representation of a month, with leading zeros
-    M: monthNames[date.getMonth()].substring(0,3), // A short textual representation of a month, three letters
-    n: date.getMonth()+1, // Numeric representation of a month, without leading zeros
-    // Year
-    Y: date.getFullYear(), // A full numeric representation of a year
-    // Time
-    G: date.getHours(), // 24-hour format of an hour without leading zeros
-    H: ('0'+date.getHours()).slice(-2), // 24-hour format of an hour with leading zeros
-    i: ('0'+date.getMinutes()).slice(-2), // Minutes with leading zeros
-    s: ('0'+date.getSeconds()).slice(-2) // Seconds with leading zeros
-  };
-  return f.map((v) => elements[v] ? elements[v] : v).join('');
-});
