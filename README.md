@@ -32,7 +32,7 @@ Um die zentrale Pflegbarkeit für alle Kunden zu gewährleisten, sollte die Klas
 <script src="https://cdn.dl.kunde.tld/bineos.min.js"></script>
 <script>
   const bineos = new Bineos("12345678");
-  bineos.init();
+  bineos.send();
 </script>
 ```
 
@@ -61,7 +61,7 @@ bineos.dataLayer = {
 bineos.dataLayer.articleId = 12345678;
 bineos.dataLayer.touchpoint = "article";
 
-bineos.init();
+bineos.send();
 ```
 
 Diese können dann wie gewohnt über die Makros verarbeitet werden.
