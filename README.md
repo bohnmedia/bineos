@@ -32,7 +32,7 @@ Um die zentrale Pflegbarkeit für alle Kunden zu gewährleisten, sollte die Klas
 <script src="https://cdn.dl.kunde.tld/bineos.min.js"></script>
 <script>
   const bineos = new Bineos("12345678");
-  bineos.init();
+  bineos.send();
 </script>
 ```
 
@@ -61,7 +61,7 @@ bineos.dataLayer = {
 bineos.dataLayer.articleId = 12345678;
 bineos.dataLayer.touchpoint = "article";
 
-bineos.init();
+bineos.send();
 ```
 
 Diese können dann wie gewohnt über die Makros verarbeitet werden.
@@ -257,6 +257,19 @@ Gibt man dem Script-Tag eine ID, kann diese über das Attribut "template-id" ver
 
 ```html
 <bineos-zone uid="tsmo807r2e0c" template-src="https://office.bohn.media/bineos/test.tpl"></bineos-zone>
+```
+
+## Placement direkt laden
+
+Wenn man kein Template in einen Container rendern möchte, sondern lediglich die Daten eines Placements benötigt, kann man das mit der Funktion "loadPlacement" tun. Diese Funktion gibt ein Promise zurück, das das Placement-Objekt mit allen Daten enthält.
+
+```javascript
+// loadPlacement(zoneUid [, Object extVars])
+bineos.loadPlacement("abcd1234").then((placement) => {
+    console.log(placement.data); // Data
+    console.log(placement.data.productLoop); // Product-Loop
+    console.log(placement.container); // Compiled container
+});
 ```
 
 ## Hooks
