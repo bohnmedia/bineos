@@ -120,7 +120,9 @@ Bineos.Placement = class {
   }
 
   load(zoneUid) {
-    this.zoneUid = zoneUid;
+    const hostname = "ad." + this.bineosClass.containerHostname;
+    const request = new Bineos.Request(hostname);
+    request.zone = zoneUid;
 
     // Global extVars
     Object.assign(this.extVar, this.bineosClass.extVar);
@@ -153,9 +155,7 @@ Bineos.Placement = class {
     this.externalTemplate = this.loadTemplate(this.templateSrc);
 
     // Request
-    this.bineosClass.request.loadScript({
-      zone: zoneUid,
-      extVar: this.extVar
-    });
+    request.appendExtVars(this.extVar);
+    request.loadScript();
   }
 };

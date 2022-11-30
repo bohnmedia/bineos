@@ -1,45 +1,34 @@
 Bineos.Request = class {
   constructor(hostname) {
-    this.hostname = hostname;
+    this.url = new URL("https://" + hostname + "/request.php");
   }
 
-  // Build request url from an object of parameters
-  buildUrl(parameters) {
-    const url = new URL("https://" + this.hostname + "/request.php");
-    Object.entries(parameters).forEach((entry) => {
-      const [key, value] = entry;
+  get zone() {
+    return this.url.searchParams.get("zone");
+  }
 
-      // Value is array
-      if (Array.isArray(value)) {
-        value.forEach((value) => url.searchParams.append(key + "[]", value));
+  set zone(value) {
+    this.url.searchParams.set("zone", value);
+  }
 
-        // Value is object
-      } else if (typeof value === "object") {
-        Object.entries(value).forEach((subEntry) => {
-          const [subKey, subValue] = subEntry;
+  appendExtVar(key, value) {
+    this.url.searchParams.append("extVar[]", key + ':' + value);
+  }
 
-          // Object item is an array
-          if (Array.isArray(subValue)) {
-            subValue.forEach((subValue) => url.searchParams.append(key + "[]", subKey + ":" + subValue));
+  appendExtVars(values) {
+    for (const [key, value] of Object.entries(values)) {
+      this.appendExtVar(key, value);
+    }
+  }
 
-            // Object item is no array
-          } else {
-            url.searchParams.append(key + "[]", subKey + ":" + subValue);
-          }
-        });
-
-        // Value is no array
-      } else {
-        url.searchParams.append(key, value);
-      }
-    });
-    return url.toString();
+  appendExtData(key, value2) {
+    this.url.searchParams.append("extData[]", key + ':' + value);
   }
 
   // Make request as script tag
-  loadScript(parameters) {
+  loadScript() {
     const script = document.createElement("script");
-    script.src = this.buildUrl(parameters);
+    script.src = this.url.toString();
     return new Promise((resolve, reject) => {
       script.addEventListener("load", resolve);
       document.head.appendChild(script);
@@ -47,9 +36,9 @@ Bineos.Request = class {
   }
 
   // Load request output into a string
-  loadText(parameters) {
+  loadText() {
     return new Promise((resolve, reject) => {
-      fetch(this.buildUrl(parameters))
+      fetch(this.url.toString())
         .then((response) => response.text())
         .then((data) => resolve(data));
     });

@@ -13,7 +13,6 @@ class Bineos {
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
     this.placementFunctions = {};
-    this.request = new Bineos.Request('ad.' + this.containerHostname);
 
     // Read get parameters
     for (const [key, value] of new URL(window.location.href).searchParams.entries()) {
@@ -104,8 +103,16 @@ class Bineos {
     });
   }
 
-  // Load the bineos script
-  init() {
+  // Set datalayer variables [Deprecated: Will be removed in 3.0]
+  set(dataLayer) {
+    for (const [key, value] of Object.entries(dataLayer)) {
+      this.dataLayer[key] = value;
+    }
+    return this;
+  }
+
+  // Send data to bineos server
+  send() {
     // Assign getParameters and className to dataLayer
     Object.assign(this.dataLayer, this.getParameter, { className: this.className });
 

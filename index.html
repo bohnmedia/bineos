@@ -22,16 +22,19 @@
     </script>
 
     <script>
-      (() => {
+      (() => {       
         const bineos = new Bineos("4b049c71c1", "dl.ndz.de");
+        const dataLayer = {
+          touchpoint: "startpage"
+        };
 
-        bineos.dataLayer.touchpoint = "startpage";
+        // bineos.dataLayer.touchpoint = "startpage";
 
         bineos.extVar.touchpoint = "startpage";
 
         bineos.loadCSS("style.css");
 
-        bineos.init();
+        bineos.set(dataLayer).send();
       })();
     </script>
   </body>
