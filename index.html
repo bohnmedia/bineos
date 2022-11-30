@@ -24,15 +24,18 @@
     <script>
       (() => {       
         const bineos = new Bineos("4b049c71c1", "dl.ndz.de");
+
         const dataLayer = {
           touchpoint: "startpage"
         };
 
-        // bineos.dataLayer.touchpoint = "startpage";
-
         bineos.extVar.touchpoint = "startpage";
 
         bineos.loadCSS("style.css");
+
+        bineos.loadPlacement("tsmo807r2e0c", {type: 3}).then((placement) => {
+          console.log("Placement Data", placement);
+        });
 
         bineos.set(dataLayer).send();
       })();

@@ -3,6 +3,10 @@ Bineos.Placement = class {
     this.bineosClass = bineosClass;
     this.data = {};
     this.extVar = {};
+    this.onPreparePlacement = [];
+    this.onLoadPlacement = [];
+    this.onCompileTemplate = [];
+    this.onOutputTemplate = [];
 
     // Generate callback id
     this.callbackId = bineosClass.generateUid();
@@ -11,6 +15,14 @@ Bineos.Placement = class {
     this.bineosClass.callback[this.callbackId] = this.callback.bind(this);
   }
 
+  // Add internal hook
+  on(modificatorName, modificatorFunction) {
+    const key = "on" + modificatorName.charAt(0).toUpperCase() + modificatorName.substring(1);
+    if (!this[key]) return console.error('BINEOS: Hook "' + key + '" does not exist');
+    this[key].push(modificatorFunction);
+  }
+
+  // Parse hooks from creative
   hookParser(modificators) {
     if (!modificators) return [];
     const container = document.createElement("div");
@@ -31,10 +43,13 @@ Bineos.Placement = class {
   }
 
   hook(name) {
-    // Run global modificators
+    // Run external modificators
     this.bineosClass[name].forEach((modificator) => modificator.apply(null, [this]));
 
-    // Run placement modificators
+    // Run internal modificators
+    this[name].forEach((modificator) => modificator.apply(null, [this]));
+
+    // Run modificators from creative
     this.hookParser(this.data[name]).forEach((modificator) => {
       try {
         modificator.args.unshift(this);
@@ -110,10 +125,10 @@ Bineos.Placement = class {
         this.target.parentNode.removeChild(this.target);
         delete this.target;
       }
-    }
 
-    // Run onOutputTemplate hook
-    this.hook("onOutputTemplate");
+      // Run onOutputTemplate hook
+      this.hook("onOutputTemplate");
+    }
 
     // We dont need the container anymore
     delete this.container;

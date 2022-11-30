@@ -53,6 +53,17 @@ class Bineos {
     return Promise.all(promisses);
   }
 
+  // Load a placement by its zoneuid
+  loadPlacement(zoneUid, extVars = {}) {
+    const placement = new Bineos.Placement(this);
+    placement.extVar = extVars;
+    return new Promise((resolve, reject) => {
+      placement.on("compileTemplate", resolve);
+      placement.load(zoneUid);
+    });
+  }
+
+  // Load placements by "bineos-zone" tags
   loadPlacements(options = {}) {
     // Load CSS and JS files for placements
     const dependenciesLoaded = this.loadPlacementDependencies(options);
