@@ -367,7 +367,7 @@ Dazu kann im Tag-Manager die Funktion "loadPlacement" zum Laden der Placements u
 ```javascript
   bineos.loadPlacements({
     'css': ['https://www.foo.tld/style.css'],
-    'js': ['https://www.foo.tld/test.js.php']
+    'js': ['https://www.foo.tld/test.js']
   });
 ```
 
