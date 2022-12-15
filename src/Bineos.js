@@ -1,7 +1,7 @@
 class Bineos {
   constructor(containerId, containerHostname) {
     this.containerId = containerId;
-    this.containerHostname = containerHostname || (BINEOSSCRIPTHOSTNAME.match(/^cdn\.dl\./) ? BINEOSSCRIPTHOSTNAME.substring(4) : "ad-srv.net");
+    this.containerHostname = containerHostname || (this.scriptHostname.match(/^cdn\.dl\./) ? this.scriptHostname.substring(4) : "ad-srv.net");
     this.ntmName = "_bineos" + this.generateUid();
     this.className = "_bineos" + this.generateUid();
     this.dataLayer = {};
@@ -12,22 +12,12 @@ class Bineos {
     this.onLoadPlacement = [];
     this.onCompileTemplate = [];
     this.onOutputTemplate = [];
-    this.placementFunctions = {};
+    this.placementFunctions = this.placementFunctions || {};
 
     // Read get parameters
     for (const [key, value] of new URL(window.location.href).searchParams.entries()) {
       this.getParameter[key] = value;
     }
-
-    // Custom function shuffle
-    this.placementFunctions.shuffle = (placement) => {
-      placement.data.productLoop.sort((a, b) => Math.random() - 0.5);
-    };
-
-    // Custom function limit
-    this.placementFunctions.limit = (placement, limit) => {
-      placement.data.productLoop.splice(limit);
-    };
 
     // Make this class global
     window[this.className] = this;
@@ -144,6 +134,9 @@ class Bineos {
     script.src = url.toString();
     document.head.appendChild(script);
   }
-};
+}
 
-Bineos.BINEOSSCRIPTHOSTNAME = new URL(document.currentScript.src).hostname;
+// Add hostname of the javascript file to the bineos class
+((scriptHostname) => {
+  Bineos.prototype.scriptHostname = scriptHostname;
+})(new URL(document.currentScript.src).hostname);

@@ -22,7 +22,7 @@ Bineos.Placement = class {
     this[key].push(modificatorFunction);
   }
 
-  // Parse hooks from creative
+  // Parse hooks from creative like a dom object
   hookParser(modificators) {
     if (!modificators) return [];
     const container = document.createElement("div");
@@ -70,7 +70,7 @@ Bineos.Placement = class {
         fetch(src)
           .then((response) => response.text())
           .then((template) => resolve(template));
-      })
+      }),
     };
   }
 
